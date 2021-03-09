@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<project xmlns:spring-boot="antlib:org.springframework.boot.ant" default="archive">
+	<property file="../build.properties" />
+	<basename property="ant.project.name" file="${basedir}" />
+	<target name="init">
+		<delete dir="${build.dir}" />
+		<mkdir dir="${build.dir}/classes" />
+		<mkdir dir="${build.dir}/classes/WEB-INF" />
+	</target>
+	<target name="compile" depends="init">
+		<javac srcdir="src" destdir="${build.dir}/classes" includeantruntime="false">
+			<classpath refid="classpath.libs" />
+		</javac>
+	</target>
+	<target name="archive" depends="compile">
+		<property name="manifest.mf" location="${build.dir}/manifest.mf" />
+		<copydir src="src/main/webapp/WEB-INF" dest="${build.dir}/classes/WEB-INF">
+		</copydir>
+		<manifest file="${manifest.mf}">
+			<attribute name="Built-By" value="${user.name}" />
+			<attribute name="Sealed" value="true" />
+			<attribute name="Built-On" value="${timestamp.isoformat}" />
+		</manifest>
+		<spring-boot:exejar destfile="${build.dir}/${ant.project.name}.war" classes="${build.dir}/classes">
+			<spring-boot:lib>
+				<fileset dir="${lib.dir}">
+					<include name="**/*.jar" />
+				</fileset>
+			</spring-boot:lib>
+			<resources>
+				<fileset dir="src/main/resources" />
+			</resources>
+		</spring-boot:exejar>
+	</target>
+	<path id="classpath.libs">
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+</project>
